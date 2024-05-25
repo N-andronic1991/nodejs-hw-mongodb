@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { env } from '../utils/env.js';
 import { ENV_VARS } from '../constants/index.js';
 
-export const initMongoDB = async () => {
+export const initMongoConnection = async () => {
   try {
     await mongoose.connect(
       `mongodb+srv://${env(ENV_VARS.MONGODB_USER)}:${env(
