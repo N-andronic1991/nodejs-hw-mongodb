@@ -5,3 +5,6 @@ export const ENV_VARS = {
   MONGODB_URL: 'MONGODB_URL',
   MONGODB_DB: 'MONGODB_DB',
 };
+
+export const minLengthOfTypeStringField = 3;
+export const maxLengthOfTypeStringField = 20;

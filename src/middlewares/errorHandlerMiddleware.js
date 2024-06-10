@@ -9,6 +9,7 @@ export const errorHandlerMiddleware = (err, req, res, next) => {
       data: {
         message: err.message,
       },
+      errors: err.errors,
     });
   }
 
