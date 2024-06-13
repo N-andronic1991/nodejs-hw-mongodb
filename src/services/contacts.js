@@ -14,8 +14,8 @@ export const getAllContacts = async ({
   if (filter.type) {
     contactsFilters.where('contactType').equals(filter.type);
   }
-  if (typeof filter.isFauvorite === 'boolean') {
-    contactsFilters.where('isFauvorite').equals(filter.isFauvorite);
+  if (typeof filter.isFavourite === 'boolean') {
+    contactsFilters.where('isFavourite').equals(filter.isFavourite);
   }
   const [contactsCount, contacts] = await Promise.all([
     Contact.find().merge(contactsFilters).countDocuments(),
