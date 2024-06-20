@@ -8,6 +8,18 @@ import {
   REFRESH_TOKEN_VALID_UNTIL,
 } from '../constants/index.js';
 
+const createSession = () => {
+  const accessToken = crypto.randomBytes(30).toString('base64');
+  const refreshToken = crypto.randomBytes(30).toString('base64');
+
+  return {
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil: ACCESS_TOKEN_VALID_UNTIL,
+    refreshTokenValidUntil: REFRESH_TOKEN_VALID_UNTIL,
+  };
+};
+
 export const createUser = async (payload) => {
   const user = await User.findOne({ email: payload.email });
   if (user) {
@@ -32,15 +44,35 @@ export const loginUser = async ({ email, password }) => {
   }
 
   await Session.deleteOne({ userId: user._id });
-  const accessToken = crypto.randomBytes(20).toString('base64');
-  const refreshToken = crypto.randomBytes(20).toString('base64');
 
   return await Session.create({
-    accessToken,
-    refreshToken,
     userId: user._id,
-    accessTokenValidUntil: ACCESS_TOKEN_VALID_UNTIL,
-    refreshTokenValidUntil: REFRESH_TOKEN_VALID_UNTIL,
+    ...createSession(),
+  });
+};
+
+export const refreshSession = async ({ sessionId, sessionToken }) => {
+  const session = await Session.findOne({
+    _id: sessionId,
+    refreshToken: sessionToken,
+  });
+  if (!session) {
+    throw createHttpError(401, 'Session not found');
+  }
+  if (new Date() > new Date(session.refreshTokenValidUntil)) {
+    throw createHttpError(401, 'Refresh token is expired');
+  }
+
+  const user = await User.findById(session.userId);
+  if (!user) {
+    throw createHttpError(401, 'Session not found');
+  }
+
+  await Session.deleteOne({ _id: sessionId });
+
+  return await Session.create({
+    userId: user._id,
+    ...createSession(),
   });
 };
 

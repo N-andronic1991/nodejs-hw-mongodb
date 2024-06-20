@@ -13,5 +13,5 @@ export const SORT_ORDER = {
 export const minLengthOfTypeStringField = 3;
 export const maxLengthOfTypeStringField = 20;
 
-export const ACCESS_TOKEN_VALID_UNTIL = Date.now() + 1000 * 60 * 15; //15min
-export const REFRESH_TOKEN_VALID_UNTIL = Date.now() + 1000 * 60 * 60 * 24 * 7; //7 days
+export const ACCESS_TOKEN_VALID_UNTIL = Date.now() + 1000 * 60 * 15;
+export const REFRESH_TOKEN_VALID_UNTIL = Date.now() + 1000 * 60 * 60 * 24 * 30;

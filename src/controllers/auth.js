@@ -1,7 +1,23 @@
 import { REFRESH_TOKEN_VALID_UNTIL } from '../constants/index.js';
-import { createUser, loginUser, logoutUser } from '../services/auth.js';
+import {
+  createUser,
+  loginUser,
+  logoutUser,
+  refreshSession,
+} from '../services/auth.js';
 
-export const registerUserController = async (req, res, next) => {
+const setupSessionCookies = (res, session) => {
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expire: REFRESH_TOKEN_VALID_UNTIL,
+  });
+  res.cookie('sessionToken', session.refreshToken, {
+    httpOnly: true,
+    expire: REFRESH_TOKEN_VALID_UNTIL,
+  });
+};
+
+export const registerUserController = async (req, res) => {
   const user = await createUser(req.body);
   res.json({
     status: 200,
@@ -10,21 +26,26 @@ export const registerUserController = async (req, res, next) => {
   });
 };
 
-export const loginUserController = async (req, res, next) => {
+export const loginUserController = async (req, res) => {
   const session = await loginUser(req.body);
 
-  res.cookie('refreshToken', session.refreshToken, {
-    httpOnly: true,
-    expire: REFRESH_TOKEN_VALID_UNTIL,
+  setupSessionCookies(res, session);
+  res.json({
+    status: 200,
+    message: 'Successfully logged in an user!',
+    data: { accessToken: session.accessToken },
   });
-  res.cookie('sessionId', session._id, {
-    httpOnly: true,
-    expire: REFRESH_TOKEN_VALID_UNTIL,
-  });
+};
+
+export const refreshUserController = async (req, res) => {
+  const { sessionId, sessionToken } = req.cookies;
+
+  const session = await refreshSession({ sessionId, sessionToken });
+  setupSessionCookies(res, session);
 
   res.json({
     status: 200,
-    message: 'Successfully login user!',
+    message: 'Successfully refreshed a session!',
     data: { accessToken: session.accessToken },
   });
 };
