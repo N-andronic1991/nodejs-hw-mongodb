@@ -23,7 +23,7 @@ const createSession = () => {
 export const createUser = async (payload) => {
   const user = await User.findOne({ email: payload.email });
   if (user) {
-    throw createHttpError(409, 'Email in use');
+    throw createHttpError(409, 'Email is already in use');
   }
   const encryptedPassword = await bcrypt.hash(payload.password, 10);
   return await User.create({

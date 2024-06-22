@@ -13,10 +13,12 @@ import {
   updateContactSchema,
 } from '../validation/contact.js';
 import { validateMongoId } from '../middlewares/validateMongoId.js';
+import { authenticate } from '../middlewares/authenticate.js';
 
 const contactsRouter = Router();
 
 contactsRouter.use('/:contactId', validateMongoId('contactId'));
+contactsRouter.use(authenticate);
 
 contactsRouter.get('/', ctrlWrapper(getContactsController));
 
