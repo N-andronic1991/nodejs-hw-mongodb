@@ -1,12 +1,17 @@
 import { User } from '../db/models/user.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import createHttpError from 'http-errors';
 import { Session } from '../db/models/session.js';
 import {
   ACCESS_TOKEN_VALID_UNTIL,
+  ENV_VARS,
+  SMTP,
   REFRESH_TOKEN_VALID_UNTIL,
 } from '../constants/index.js';
+import { sendMail } from '../utils/sendMail.js';
+import { env } from '../utils/env.js';
 
 const createSession = () => {
   const accessToken = crypto.randomBytes(30).toString('base64');
@@ -81,4 +86,32 @@ export const logoutUser = async ({ sessionId, sessionToken }) => {
     _id: sessionId,
     refreshToken: sessionToken,
   });
+};
+
+export const resetPasswordEmail = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  const token = jwt.sign({ sub: user._id, email }, env(ENV_VARS.JWT_SECRET), {
+    expiresIn: '5m',
+  });
+
+  try {
+    await sendMail({
+      from: env(SMTP.SMTP_FROM),
+      to: email,
+      subject: 'Reset your password',
+      html: `<h1>Hello</h1>
+    <p>Here is your link <a href="${token}">Link</a>to reset your password</p>`,
+    });
+  } catch (err) {
+    console.log(err);
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
 };
