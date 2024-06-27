@@ -9,9 +9,13 @@ import {
   ENV_VARS,
   SMTP,
   REFRESH_TOKEN_VALID_UNTIL,
+  TEMPLATE_DIR,
 } from '../constants/index.js';
 import { sendMail } from '../utils/sendMail.js';
 import { env } from '../utils/env.js';
+import Handlebars from 'handlebars';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 const createSession = () => {
   const accessToken = crypto.randomBytes(30).toString('base64');
@@ -99,13 +103,23 @@ export const resetPasswordEmail = async (email) => {
     expiresIn: '5m',
   });
 
+  const templateSource = await fs.readFile(
+    path.join(TEMPLATE_DIR, 'reset-password-email.html'),
+  );
+
+  const template = Handlebars.compile(templateSource.toString());
+
+  const html = template({
+    name: user.name,
+    link: `${env(ENV_VARS.APP_DOMAIN)}/reset-password?token=${token}`,
+  });
+
   try {
     await sendMail({
       from: env(SMTP.SMTP_FROM),
       to: email,
       subject: 'Reset your password',
-      html: `<h1>Hello</h1>
-    <p>Here is your link <a href="${token}">Link</a>to reset your password</p>`,
+      html,
     });
   } catch (err) {
     console.log(err);
@@ -114,4 +128,31 @@ export const resetPasswordEmail = async (email) => {
       'Failed to send the email, please try again later.',
     );
   }
+};
+
+export const resetPassword = async ({ password, token }) => {
+  let tokenPayload;
+  try {
+    tokenPayload = jwt.verify(token, env(ENV_VARS.JWT_SECRET));
+  } catch (err) {
+    throw createHttpError(401, err.message);
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await User.findOne({
+    _id: tokenPayload.sub,
+    email: tokenPayload.email,
+  });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  await User.updateOne(
+    {
+      _id: user._id,
+    },
+    { password: hashedPassword },
+  );
 };

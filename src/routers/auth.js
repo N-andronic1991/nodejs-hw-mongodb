@@ -5,12 +5,14 @@ import {
   loginUserSchema,
   registerUserSchema,
   resetPasswordEmailSchema,
+  resetPasswordSchema,
 } from '../validation/auth.js';
 import {
   loginUserController,
   logoutUserController,
   refreshUserController,
   registerUserController,
+  resetPasswordController,
   resetPasswordEmailController,
 } from '../controllers/auth.js';
 
@@ -27,11 +29,19 @@ authRouter.use(
   ctrlWrapper(loginUserController),
 );
 authRouter.use('/refresh', ctrlWrapper(refreshUserController));
+
 authRouter.use('/logout', ctrlWrapper(logoutUserController));
 
 authRouter.use(
-  '/reset-password',
+  '/send-reset-email',
   validateBody(resetPasswordEmailSchema),
   ctrlWrapper(resetPasswordEmailController),
 );
+
+authRouter.use(
+  '/reset-password',
+  validateBody(resetPasswordSchema),
+  ctrlWrapper(resetPasswordController),
+);
+
 export default authRouter;
