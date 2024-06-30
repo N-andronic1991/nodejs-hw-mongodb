@@ -29,3 +29,10 @@ export const ACCESS_TOKEN_VALID_UNTIL = Date.now() + 1000 * 60 * 15;
 export const REFRESH_TOKEN_VALID_UNTIL = Date.now() + 1000 * 60 * 60 * 24 * 30;
 
 export const TEMPLATE_DIR = path.join(process.cwd(), 'src', 'templates');
+export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
+
+export const CLOUDINARY = {
+  CLOUD_NAME: 'CLOUD_NAME',
+  API_KEY: 'API_KEY',
+  API_SECRET: 'API_SECRET',
+};

@@ -1,6 +1,7 @@
 import { SORT_ORDER } from '../constants/index.js';
 import { Contact } from '../db/models/contact.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { saveFileToCloudinary } from '../utils/saveToCloudinary.js';
 
 export const getAllContacts = async ({
   page = 1,
@@ -18,8 +19,6 @@ export const getAllContacts = async ({
   if (typeof filter.isFavourite === 'boolean') {
     contactsFilters.where('isFavourite').equals(filter.isFavourite);
   }
-
-  // contactsFilters.where('contactOwner').equals(userId);
 
   const [contactsCount, contacts] = await Promise.all([
     Contact.find().merge(contactsFilters).countDocuments(),
@@ -45,23 +44,29 @@ export const getContactById = async (contactId, userId) => {
   return contact;
 };
 
-export const createContact = async (payload, userId) => {
-  const contact = await Contact.create({ ...payload, userId: userId });
+export const createContact = async ({ photo, ...payload }, userId) => {
+  const photoUrl = await saveFileToCloudinary(photo);
+  const contact = await Contact.create({
+    ...payload,
+    userId: userId,
+    photo: photoUrl,
+  });
   return contact;
 };
 
 export const updateContact = async (
   contactId,
   userId,
-  payload,
+  { photo, ...payload },
   options = {},
 ) => {
+  const photoUrl = await saveFileToCloudinary(photo);
   const rawResult = await Contact.findOneAndUpdate(
     {
       _id: contactId,
       userId: userId,
     },
-    payload,
+    { ...payload, photo: photoUrl },
 
     {
       new: true,
