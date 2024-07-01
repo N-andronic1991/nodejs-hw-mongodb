@@ -12,7 +12,7 @@ const parseBoolean = (unknown) => {
 
 export const parseFilterParams = (query) => {
   return {
-    type: parseType(query.type),
+    contactType: parseType(query.contactType),
     isFavourite: parseBoolean(query.isFavourite),
   };
 };

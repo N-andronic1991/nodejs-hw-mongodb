@@ -39,7 +39,7 @@ authRouter.use(
 );
 
 authRouter.use(
-  '/reset-password',
+  '/reset-pwd',
   validateBody(resetPasswordSchema),
   ctrlWrapper(resetPasswordController),
 );

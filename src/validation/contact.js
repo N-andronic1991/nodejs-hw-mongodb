@@ -22,7 +22,6 @@ export const createContactSchema = Joi.object({
     .min(minLengthOfTypeStringField)
     .max(maxLengthOfTypeStringField)
     .valid('work', 'home', 'personal'),
-  userId: Joi.string().required(),
 });
 
 export const updateContactSchema = Joi.object({

@@ -13,8 +13,8 @@ export const getAllContacts = async ({
 }) => {
   const skip = (page - 1) * perPage;
   const contactsFilters = Contact.find({ ...filter, userId });
-  if (filter.type) {
-    contactsFilters.where('contactType').equals(filter.type);
+  if (filter.contactType) {
+    contactsFilters.where('contactType').equals(filter.contactType);
   }
   if (typeof filter.isFavourite === 'boolean') {
     contactsFilters.where('isFavourite').equals(filter.isFavourite);
